@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body{
+      font-family:'Cairo',sans-serif;
+      background:#f5f7fb;
+      margin:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:100vh
+    }
+    .card{
+      background:#fff;
+      box-shadow:0 10px 25px rgba(0,0,0,.08);
+      border-radius:12px;
+      padding:28px;
+      max-width:420px;
+      width:100%
+    }
+    h1{margin:.2rem 0 1.2rem 0;font-size:22px}
+    label{display:block;margin:.6rem 0 .25rem 0;font-weight:600}
+    input{
+      width:100%;
+      padding:12px;
+      border:1px solid #d8dbe6;
+      border-radius:8px;
+      font-size:15px
+    }
+    button{
+      width:100%;
+      padding:12px 16px;
+      margin-top:16px;
+      border:0;
+      border-radius:10px;
+      background:#23527c;
+      color:#fff;
+      font-size:16px;
+      cursor:pointer
+    }
+    button:hover{background:#1e466a}
+    .error{
+      background:#ffefef;
+      border:1px solid #f5abab;
+      color:#a02222;
+      padding:10px;
+      border-radius:8px;
+      margin-top:10px;
+      display:none
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>تسجيل الدخول</h1>
+    <label for="loginId">الإيميل أو رقم الهوية</label>
+    <input id="loginId" type="text" placeholder="example@email.com أو 1xxxxxxxxx">
+    <label for="password">كلمة المرور</label>
+    <input id="password" type="password" placeholder="••••••••">
+    <button id="btnLogin">دخول</button>
+    <div id="err" class="error"></div>
+  </div>
+
+<script>
+// رابط Web App المنشور
+const WEB_APP_URL = 'https://script.google.com/a/macros/tuwaiqcih.org.sa/s/AKfycbz6c7lxANP7viAFKgYWtrsoASwRHVj4qsZN6UeEukECqu-BGzJOjAlGIF9ZO4xrHUiE4g/exec';
+
+document.getElementById('btnLogin').addEventListener('click', async () => {
+  const loginId = document.getElementById('loginId').value.trim();
+  const password = document.getElementById('password').value.trim();
+  const err = document.getElementById('err');
+  err.style.display = 'none'; 
+  err.textContent='';
+
+  if(!loginId || !password){
+    err.textContent = 'الرجاء تعبئة الإيميل/الهوية وكلمة المرور.';
+    err.style.display='block';
+    return;
+  }
+
+  try {
+    const res = await fetch(WEB_APP_URL, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ action:'login', loginId, password })
+    });
+    const data = await res.json();
+    if(!data.success){
+      err.textContent = data.message || 'فشل تسجيل الدخول.';
+      err.style.display='block';
+      return;
+    }
+
+    // حفظ بيانات الجلسة
+    localStorage.setItem('emp_email', data.email || '');
+    localStorage.setItem('emp_id', data.nationalId || '');
+    localStorage.setItem('emp_name', data.name || '');
+    localStorage.setItem('emp_assignment', data.assignment || '');
+    localStorage.setItem('emp_loginId', loginId);
+    localStorage.setItem('emp_password', password);
+
+    // التحويل إلى الصفحة الرئيسية المطلوبة
+    window.location.href = 'index.html';
+  } catch(e){
+    err.textContent = 'تعذر الاتصال بالخادم. تأكد من رابط الـ Web App وإعدادات النشر.';
+    err.style.display='block';
+  }
+});
+</script>
+</body>
+</html>
